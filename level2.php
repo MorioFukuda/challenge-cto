@@ -113,6 +113,39 @@ function ymlConverter($yml){
 
 //var_dump(csvConverter($csvRaw));
 //var_dump(tsvConverter($tsvRaw));
-var_dump(ymlConverter($ymlRaw));
+//var_dump(ymlConverter($ymlRaw));
+
+function tsvMerger($csvData, $tsvData, $ymlData){
+
+	$mergedData = array_merge($csvData, $tsvData, $ymlData);
+
+//	var_dump($mergedData);
+
+	$tsv = "";
+
+	//tsvファイルのカラムのリストをmergedDataのキーから取得
+	$columnList = array_keys($mergedData[0]);
+
+	//tsvファイルの1行目に$columnListをタブで結合したものを格納
+	$tsv .= implode("\t", $columnList);
+
+	//tsvの2行目以降を$tsvに足し込んでいく
+	foreach($mergedData as $data){
+		$tsv .= implode("\t", $data) . "\n";
+	}
+
+	$tsvFile = fopen('merged_booklist.tsv', 'w');
+
+	if(fwrite($tsvFile, $tsv)){
+		fclose($tsvFile);
+		echo "merged_booklist.tsvを作成しました。\n";
+	}else{
+		echo "merged_booklist.tsvの作成に失敗しました。\n";
+	}
+}
+
+
+tsvMerger(csvConverter($csvRaw), tsvConverter($tsvRaw), ymlConverter($ymlRaw));
+
 
 ?>
