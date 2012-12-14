@@ -1,5 +1,8 @@
 <?php
 
+//yamlを読み込むライブラリ
+require_once('spyc.php');
+
 $csvRaw = file_get_contents('booklist.csv');
 $tsvRaw = file_get_contents('booklist.tsv');
 $ymlRaw = file_get_contents('booklist.yml');
@@ -87,7 +90,29 @@ function tsvConverter($tsv){
 }
 
 
-//var_dump( csvConverter($csvRaw) );
-var_dump(tsvConverter($tsvRaw));
+function ymlConverter($yml){
+
+	$rawYmls = Spyc::YAMLLoad($yml);
+
+	$ymlData = array();
+
+	foreach($rawYmls as $isbn => $rawYml){
+		$data['ISBN'] = $isbn;
+		$data['title'] = $rawYml['title'];
+		$data['author'] = $rawYml['author'];
+		$data['price'] = $rawYml['price'];
+		$data['amazon-url'] = $rawYml['amazon-url'];
+
+		$ymlData[] = $data;
+	}
+
+	unset($isbn, $rawYml);
+
+	return $ymlData;
+}
+
+//var_dump(csvConverter($csvRaw));
+//var_dump(tsvConverter($tsvRaw));
+var_dump(ymlConverter($ymlRaw));
 
 ?>
