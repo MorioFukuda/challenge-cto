@@ -7,6 +7,8 @@ $ymlRaw = file_get_contents('booklist.yml');
 function csvConverter($csv){
 
 	$encodingList = "UTF-8, UTF-7, ASCII, EUC-JP, SJIS, eucJP-win, SJIS-win, JIS, ISO-2022-JP";
+
+	//1行以上の改行で区切る。
 	$csvLines = preg_split('/[\n]+/', mb_convert_encoding($csv, 'UTF-8', $encodingList)); 
 
 	//csvのヘッダーを$csvHeaderに格納し、ヘッダーを削除
@@ -26,6 +28,14 @@ function csvConverter($csv){
 			return false;
 		}
 
+		/*
+			$csvData[0]["ISBN"] = 123876124
+							   ["title"] = hoge
+								 ["author"] = hoge
+								 ["price"] = 2000
+								 ["amazon-url"] = http://www.amazon.com
+			みたいな形で格納する。
+		*/
 		for($i = 0; $i < count($csvHeader); $i++){
 			$csvData[$counter][$csvHeader[$i]] = $data[$i];
 		}
@@ -33,9 +43,51 @@ function csvConverter($csv){
 		$counter++;
 	}
 
+	unset($line);
+
 	return $csvData;
 }
 
-var_dump( csvConverter($csvRaw) );
+
+function tsvConverter($tsv){
+	
+	$encodingList = "UTF-8, UTF-7, ASCII, EUC-JP, SJIS, eucJP-win, SJIS-win, JIS, ISO-2022-JP";
+
+	//1行以上の改行で区切る
+	$tsvLines = preg_split('/[\n]+/', mb_convert_encoding($tsv, 'UTF-8', $encodingList));
+
+	//1行目に含まれるタブをカンマに変換して、str_getcsvに渡す。
+	$tsvHeader = str_getcsv(preg_replace('/\t/', ',', $tsvLines[0]), ',', '"');
+	//ヘッダーを削除
+	unset($tsvLines[0]);
+
+	$tsvData = array();
+	$counter = 0;
+
+	foreach($tsvLines as $line){
+	
+		$data = str_getcsv(preg_replace('/\t/', ',', $line), ',', '"');
+
+		//1行のレコードの数が、$tsvHeaderの数と合わなかったらエラーを出す
+		if(count($data) !== count($tsvHeader)){
+			echo "TSVファイルが壊れています";
+			return false;
+		}
+
+		for($i = 0; $i < count($tsvHeader); $i++){
+			$tsvData[$counter][$tsvHeader[$i]] = $data[$i];
+		}
+
+		$counter++;
+	}
+	
+	unset($line);
+
+	return $tsvData;
+}
+
+
+//var_dump( csvConverter($csvRaw) );
+var_dump(tsvConverter($tsvRaw));
 
 ?>
